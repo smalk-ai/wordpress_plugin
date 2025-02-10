@@ -63,8 +63,6 @@ function smalk_clear_caches($option_name) {
     );
 
     if (in_array($option_name, $cache_clearing_option_names)) {
-        delete_option(SMALK_AI_USER_AGENT_STRINGS_LIST);
-        delete_option(SMALK_AI_ROBOTS_TXT);
         delete_option(SMALK_AI_USER);
     }
 }
@@ -72,20 +70,29 @@ add_action('update_option', 'smalk_clear_caches');
 
 
 function smalk_get_robots_txt() {
-    $cached_robots_txt = get_option(SMALK_AI_ROBOTS_TXT);
-
-    if ($cached_robots_txt === false) {
-        return smalk_refresh_and_return_robots_txt();
-    } else {
-        return $cached_robots_txt;
+    $access_token = get_option(SMALK_AI_ACCESS_TOKEN);
+    
+    if (!$access_token) {
+        return '';
     }
+    
+    $api_url = 'https://api.smalk.me/api/v1/robots-txt';
+    
+    $headers = array(
+        'Content-Type' => 'application/json',
+        'Authorization' => 'Api-Key ' . $access_token
+    );
+    
+    $response = wp_remote_get($api_url, array(
+        'headers' => $headers
+    ));
+    
+    if (smalk_is_network_response_code_successful($response)) {
+        return wp_remote_retrieve_body($response);
+    }
+    
+    return '';
 }
-
-// Cron Jobs
-
-add_action(SMALK_AI_DAILY_CRON_EVENT, 'smalk_refresh_and_return_user_agent_strings_list');
-add_action(SMALK_AI_DAILY_CRON_EVENT, 'smalk_refresh_and_return_robots_txt');
-add_action(SMALK_AI_EVERY_FIVE_MINUTES_CRON_EVENT, 'smalk_refresh_and_return_user');
 
 // Helpers
 
