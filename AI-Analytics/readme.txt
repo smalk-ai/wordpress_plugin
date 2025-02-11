@@ -8,7 +8,7 @@ Tags: AI Analytics, AI Search, AI Agents, AI Bots, ChatGPT, Claude AI, Perplexit
 Requires at least: 5.0
 Tested up to: 6.7
 Requires PHP: 7.0
-Stable tag: 1.0.0
+Stable tag: 1.0.1
 License: GPLv3
 License URI: http://www.gnu.org/licenses/gpl.html
 
@@ -64,5 +64,7 @@ FREQUENTLY ASKED QUESTIONS
 
 CHANGELOG
 =========
+1.0.1
+Fix robots.txt generation
 1.0.0
 Initial release
