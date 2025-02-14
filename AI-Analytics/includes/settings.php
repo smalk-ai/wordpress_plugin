@@ -130,7 +130,7 @@ function smalk_page() {
                         </th>
                         <td>
                             <p>
-                                <a href="https://www.smalk.me/signup" target="_blank">Sign up</a> for Smalk AI Agent Analytics and create a new project for this website. This will take less than 30 seconds.
+                                <a href="https://www.app.smalk.me/login" target="_blank">Sign up</a> for Smalk AI Agent Analytics and create a new project for this website. This will take less than 30 seconds.
                             </p>
                         </td>
                     </tr>
@@ -164,8 +164,8 @@ function smalk_page() {
                             />
                             <label for="<?php echo esc_attr(SMALK_AI_IS_ANALYTICS_ENABLED); ?>">Enable Agent Analytics</label><br>
                             <p>
-                                Track the activity of all known AI agents crawling your website. Insights will appear on your Smalk AI Dashboard. You can test this by following the instructions 
-                                in the <a href="https://www.smalk.me/signin" target="_blank">docs</a>.
+                                Track the activity of all known AI agents crawling your website and Users coming from AI Search Engines. Insights will appear on your Smalk AI Dashboard. Visit our website for more 
+                                <a href="https://www.smalk.me/" target="_blank">infos</a>.
                             </p>
                         </td>
                     </tr>
