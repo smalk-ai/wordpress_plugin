@@ -43,7 +43,7 @@ function smalk_add_analytics_script_tag() {
 
     if ($should_add_analytics_script_tag) {
         echo "
-<!-- Smalk AI Agent Analytics (https://smalk.me/analytics/) -->
+<!-- Smalk AI Agent Analytics (https://smalk.me) -->
 ";
     
         echo smalk_get_user_analytics_script_tag();
@@ -53,7 +53,7 @@ function smalk_add_analytics_script_tag() {
     }
 }
 
-add_action('wp_head', 'smalk_add_analytics_script_tag');
+add_action('wp_head', 'smalk_add_analytics_script_tag', 1);
 
 // Helpers
 
