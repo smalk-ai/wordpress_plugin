@@ -191,7 +191,7 @@ function smalk_page() {
                         box-shadow: 8px 8px 12px rgba(0, 0, 0, 0.1);
                     "
                 >
-                    Go to your Smalk Dashboard —->
+                    Go to your Smalk Dashboard 👉
                 </a>
 
                 <?php submit_button(); ?>
