@@ -118,7 +118,7 @@ function smalk_page() {
                 <h1>Smalk AI Agent Analytics</h1>
                 <a href="https://www.smalk.me" target="_blank">Go to the Smalk AI Website</a>
             </div>
-            <p>Gain real-time insights into AI agents, crawlers, and scrapers accessing your website and manage your viibility on the AI Search Era.</p>
+            <p>Gain real-time insights into AI agents, crawlers, and scrapers accessing your website and manage your visibility on the AI Search Era.</p>
             <h2>Configuration</h2>
             <form method="post" action="options.php" class="smalk-form">
                 <?php settings_fields(SMALK_AI_SETTINGS_GROUP); ?>
@@ -170,6 +170,30 @@ function smalk_page() {
                         </td>
                     </tr>
                 </table>
+
+                   <!-- Added button below the table -->
+                    <a 
+                    href="https://app.smalk.me/login" 
+                    target="_blank" 
+                    style="
+                        display: inline-block; 
+                        width: 100%; 
+                        min-height: 75px; 
+                        background: #EADAEF; 
+                        color: black; 
+                        font-family: 'DM Sans', sans-serif; 
+                        font-size: 16px; 
+                        text-align: center; 
+                        line-height: 75px; 
+                        text-decoration: none;
+                        margin-top: 1rem;
+                        border-radius: 8px;
+                        box-shadow: 8px 8px 12px rgba(0, 0, 0, 0.1);
+                    "
+                >
+                    Go to your Smalk Dashboard —->
+                </a>
+
                 <?php submit_button(); ?>
             </form>
         </div>
