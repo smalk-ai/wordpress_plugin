@@ -3,7 +3,7 @@ Smalk AI Analytics Plugin
 ===========
 
 Contributors: Smalk AI
-Website: https://www.smalk.me
+Website: https://www.smalk.ai
 Tags: AI Analytics, AI Search, AI Agents, AI Bots, ChatGPT, Claude AI, Perplexity, Gemini, Google AI Overviews, Mistral AI, AI Crawlers, AI Optimization
 Requires at least: 5.0
 Tested up to: 6.7
