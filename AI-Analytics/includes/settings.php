@@ -116,7 +116,7 @@ function smalk_page() {
             <div class="header-container">
                 <img src="<?php echo esc_url(SMALK_AI_LOGO_URL); ?>">
                 <h1>Smalk AI Agent Analytics</h1>
-                <a href="https://www.smalk.me" target="_blank">Go to the Smalk AI Website</a>
+                <a href="https://www.smalk.ai" target="_blank">Go to the Smalk AI Website</a>
             </div>
             <p>Gain real-time insights into AI agents, crawlers, and scrapers accessing your website and manage your visibility on the AI Search Era.</p>
             <h2>Configuration</h2>
@@ -130,7 +130,7 @@ function smalk_page() {
                         </th>
                         <td>
                             <p>
-                                <a href="https://www.app.smalk.me/login" target="_blank">Sign up</a> for Smalk AI Agent Analytics and create a new project for this website. This will take less than 30 seconds.
+                                <a href="https://www.app.smalk.ai/login" target="_blank">Sign up</a> for Smalk AI Agent Analytics and create a new project for this website. This will take less than 30 seconds.
                             </p>
                         </td>
                     </tr>
@@ -165,7 +165,7 @@ function smalk_page() {
                             <label for="<?php echo esc_attr(SMALK_AI_IS_ANALYTICS_ENABLED); ?>">Enable Agent Analytics</label><br>
                             <p>
                                 Track the activity of all known AI agents crawling your website and Users coming from AI Search Engines. Insights will appear on your Smalk AI Dashboard. Visit our website for more 
-                                <a href="https://www.smalk.me/" target="_blank">infos</a>.
+                                <a href="https://www.smalk.ai/" target="_blank">infos</a>.
                             </p>
                         </td>
                     </tr>
@@ -173,7 +173,7 @@ function smalk_page() {
 
                    <!-- Added button below the table -->
                     <a 
-                    href="https://app.smalk.me/login" 
+                    href="https://app.smalk.ai/login" 
                     target="_blank" 
                     style="
                         display: inline-block; 
