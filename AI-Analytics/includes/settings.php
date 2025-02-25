@@ -118,7 +118,7 @@ function smalk_page() {
                 <h1>Smalk AI Agent Analytics</h1>
                 <a href="https://www.smalk.ai" target="_blank">Go to the Smalk AI Website</a>
             </div>
-            <p>Gain real-time insights into AI agents, crawlers, and scrapers accessing your website and manage your visibility on the AI Search Era.</p>
+            <p>Gain real-time insights into AI agents, crawlers, and scrapers accessing your website—and take control of your visibility in the AI-powered search era.</p>
             <h2>Configuration</h2>
             <form method="post" action="options.php" class="smalk-form">
                 <?php settings_fields(SMALK_AI_SETTINGS_GROUP); ?>
@@ -146,7 +146,7 @@ function smalk_page() {
                                 name="<?php echo esc_attr(SMALK_AI_ACCESS_TOKEN); ?>" 
                                 value="<?php echo esc_attr(get_option(SMALK_AI_ACCESS_TOKEN, '')); ?>"
                             />
-                            <p>Copy your API Key from your Smalk AI project's settings page.</p>
+                            <p>Create & Copy your API Key from your Smalk AI project's settings page (Settings -> API Keys).</p>
                         </td>
                     </tr>
                     <tr>
