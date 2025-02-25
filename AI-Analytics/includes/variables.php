@@ -27,7 +27,7 @@ function smalk_get_user_analytics_script_tag() {
         return '';
     }
     
-    $api_url = 'https://api.smalk.me/api/v1/projects';
+    $api_url = 'https://api.smalk.ai/api/v1/projects';
     
     $headers = array(
         'Content-Type' => 'application/json',
@@ -44,7 +44,7 @@ function smalk_get_user_analytics_script_tag() {
         if (!empty($project) && isset($project['id'])) {
             $project_id = $project['id'];
             return sprintf(
-                '<script src="https://api.smalk.me/tracker.js?PROJECT_KEY=%s"></script>',
+                '<script src="https://api.smalk.ai/tracker.js?PROJECT_KEY=%s"></script>',
                 esc_attr($project_id)
             );
         }
@@ -76,7 +76,7 @@ function smalk_get_robots_txt() {
         return '';
     }
     
-    $api_url = 'https://api.smalk.me/api/v1/robots-txt';
+    $api_url = 'https://api.smalk.ai/api/v1/robots-txt';
     
     $headers = array(
         'Content-Type' => 'application/json',
