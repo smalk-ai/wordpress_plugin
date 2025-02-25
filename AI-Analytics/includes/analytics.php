@@ -27,7 +27,7 @@ function smalk_send_visit_request() {
             'wordpress_plugin_version' => SMALK_AI_WORDPRESS_PLUGIN_VERSION
         );
 
-        wp_remote_post('https://api.smalk.me/api/v1/tracking/visit', array(
+        wp_remote_post('https://api.smalk.ai/api/v1/tracking/visit', array(
             'headers' => $headers,
             'body' => wp_json_encode($body)
         ));
@@ -43,7 +43,7 @@ function smalk_add_analytics_script_tag() {
 
     if ($should_add_analytics_script_tag) {
         echo "
-<!-- Smalk AI Agent Analytics (https://smalk.me) -->
+<!-- Smalk AI Agent Analytics (https://smalk.ai) -->
 ";
     
         echo smalk_get_user_analytics_script_tag();
