@@ -16,7 +16,7 @@ function smalk_echo_robots_txt_block($robots_txt) {
 # ---------------------------\n";
 
     echo "\nAuthor: Smalk AI
-Website: https://www.smalk.me
+Website: https://www.smalk.ai
 Description: Smalk AI delivers an enterprise-grade Content Intelligence Platform that enables marketing teams to measure, analyze, and optimize their brand and products visibility across generative AI search engines like ChatGPT, Google SGE, Microsoft Copilot, Perplexity AI, Claude, etc...\n";
 
     echo esc_textarea($robots_txt);
