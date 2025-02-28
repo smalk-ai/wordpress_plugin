@@ -3,9 +3,40 @@
 // Registration
 
 function smalk_register_settings() {
-    register_setting(SMALK_AI_SETTINGS_GROUP, SMALK_AI_ACCESS_TOKEN);
-    register_setting(SMALK_AI_SETTINGS_GROUP, SMALK_AI_IS_ANALYTICS_ENABLED);
-    // Removed settings related to blocking AI agents and enforcing robots.txt
+    // Define settings arguments as constants
+    define('SMALK_AI_ACCESS_TOKEN_ARGS', array(
+        'type' => 'string',
+        'group' => SMALK_AI_SETTINGS_GROUP,
+        'description' => 'Smalk AI Access Token',
+        'sanitize_callback' => 'sanitize_text_field',
+        'show_in_rest' => false,
+        'default' => ''
+    ));
+
+    define('SMALK_AI_ANALYTICS_ENABLED_ARGS', array(
+        'type' => 'boolean',
+        'group' => SMALK_AI_SETTINGS_GROUP,
+        'description' => 'Enable/Disable Analytics',
+        'sanitize_callback' => 'smalk_sanitize_checkbox',
+        'show_in_rest' => false,
+        'default' => '1'
+    ));
+
+    register_setting(
+        SMALK_AI_SETTINGS_GROUP,
+        SMALK_AI_ACCESS_TOKEN,
+        SMALK_AI_ACCESS_TOKEN_ARGS
+    );
+
+    register_setting(
+        SMALK_AI_SETTINGS_GROUP,
+        SMALK_AI_IS_ANALYTICS_ENABLED,
+        SMALK_AI_ANALYTICS_ENABLED_ARGS
+    );
+}
+
+function smalk_sanitize_checkbox($input) {
+    return isset($input) ? '1' : '0';
 }
 
 add_action('admin_init', 'smalk_register_settings');
@@ -113,9 +144,62 @@ function smalk_page() {
     <div class="wrap">
         <h1 class="fake-header"></h1>
         <div class="container">
-            <div class="header-container">
-                <img src="<?php echo esc_url(SMALK_AI_LOGO_URL); ?>">
-                <h1>Smalk AI Agent Analytics</h1>
+        <div class="header-container">
+            <?php 
+            $logo_url = SMALK_AI_LOGO_URL;
+            
+            // Try to get image from media library first
+            $attachment_id = attachment_url_to_postid(esc_url($logo_url));
+            if ($attachment_id) {
+                echo wp_get_attachment_image(
+                    $attachment_id,
+                    array(50, 50), // Set specific dimensions
+                    false,
+                    array(
+                        'style' => 'height: 2rem; width: auto;', // Maintain aspect ratio
+                        'alt' => 'Smalk AI Logo',
+                        'width' => '50',
+                        'height' => '50'
+                    )
+                );
+            } else {
+                // If not in media library, create a temporary attachment
+                require_once(ABSPATH . 'wp-admin/includes/media.php');
+                require_once(ABSPATH . 'wp-admin/includes/file.php');
+                require_once(ABSPATH . 'wp-admin/includes/image.php');
+                
+                // Download file to temp location
+                $tmp = download_url(esc_url($logo_url));
+                
+                if (!is_wp_error($tmp)) {
+                    $file_array = array(
+                        'name' => basename($logo_url),
+                        'tmp_name' => $tmp
+                    );
+                    
+                    // Create the attachment
+                    $attachment_id = media_handle_sideload($file_array, 0);
+                    
+                    if (!is_wp_error($attachment_id)) {
+                        echo wp_get_attachment_image(
+                            $attachment_id,
+                            array(50, 50), // Set specific dimensions
+                            false,
+                            array(
+                                'style' => 'height: 2rem; width: auto;', // Maintain aspect ratio
+                                'alt' => 'Smalk AI Logo',
+                                'width' => '50',
+                                'height' => '50'
+                            )
+                        );
+                    }
+                    
+                    // Clean up temp file
+                    wp_delete_file($tmp);
+                }
+            }
+            ?>
+        <h1>Smalk AI Agent Analytics</h1>
                 <a href="https://www.smalk.ai" target="_blank">Go to the Smalk AI Website</a>
             </div>
             <p>Gain real-time insights into AI agents, crawlers, and scrapers accessing your website—and take control of your visibility in the AI-powered search era.</p>
