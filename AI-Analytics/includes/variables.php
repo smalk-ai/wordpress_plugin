@@ -22,35 +22,26 @@ function smalk_get_user_is_analytics_disallowed() {
 
 function smalk_get_user_analytics_script_tag() {
     $access_token = get_option(SMALK_AI_ACCESS_TOKEN);
-    
     if (!$access_token) {
         return '';
     }
     
     $api_url = 'https://api.smalk.ai/api/v1/projects';
-    
     $headers = array(
         'Content-Type' => 'application/json',
         'Authorization' => 'Api-Key ' . $access_token
     );
     
-    $response = wp_remote_get($api_url, array(
-        'headers' => $headers
-    ));
+    $response = wp_remote_get($api_url, array('headers' => $headers));
     
     if (smalk_is_network_response_code_successful($response)) {
         $project = json_decode(wp_remote_retrieve_body($response), true);
-        
         if (!empty($project) && isset($project['id'])) {
-            $project_id = $project['id'];
-            return sprintf(
-                '<script src="https://api.smalk.ai/tracker.js?PROJECT_KEY=%s"></script>',
-                esc_attr($project_id)
-            );
+            $project_id = esc_attr($project['id']);
+            return $project_id;
         }
     }
     
-    // Return empty string if we couldn't get the project ID
     return '';
 }
 
