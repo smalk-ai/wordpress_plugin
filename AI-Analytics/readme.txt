@@ -1,10 +1,10 @@
 
-Smalk AI Analytics Plugin
+Smalk AI Analytics
 ===========
 
 Contributors: Smalk AI
 Website: https://www.smalk.ai
-Tags: AI Analytics, AI Search, AI Agents, AI Bots, ChatGPT, Claude AI, Perplexity, Gemini, Google AI Overviews, Mistral AI, AI Crawlers, AI Optimization
+Tags: AI Analytics, AI Search, AI Bots, AI Optimization, Generative Engine Optimization
 Requires at least: 5.0
 Tested up to: 6.7
 Requires PHP: 7.0
@@ -12,7 +12,7 @@ Stable tag: 1.0.1
 License: GPLv3
 License URI: http://www.gnu.org/licenses/gpl.html
 
-Unlock the power of AI traffic. Get real-time insights into AI agents, chatbots, and search crawlers visiting your website, and optimize your content for AI-driven search engines like ChatGPT, Perplexity, Google AI Overviews, Claude AI, Mistral AI, etc…
+Monitor AI search visitors to your website and optimize content for AI-driven search engines like ChatGPT, Perplexity, Google AIO, etc...
 
 DESCRIPTION
 ===========
@@ -42,7 +42,7 @@ INSTALLATION
 ============
 1. Install and activate the Smalk AI plugin from the WordPress Plugin Directory.
 2. Go to the plugin’s settings page.
-3. Connect your Smalk AI account and copy your API Key (sign up here).
+3. Connect your Smalk AI account and copy your API Key
 4. Configure your AI agent tracking preferences and start optimizing your content!
 
 FREQUENTLY ASKED QUESTIONS
