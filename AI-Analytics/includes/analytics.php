@@ -40,20 +40,33 @@ add_action('wp_loaded', 'smalk_send_visit_request');
 
 function smalk_add_analytics_script_tag() {
     $should_add_analytics_script_tag = smalk_is_analytics_enabled_and_allowed();
-
-    if ($should_add_analytics_script_tag) {
-        echo "
-<!-- Smalk AI Agent Analytics (https://smalk.ai) -->
-";
     
-        echo smalk_get_user_analytics_script_tag();
-
-        echo "
-";
+    if ($should_add_analytics_script_tag) {
+        $project_id = smalk_get_user_analytics_script_tag();
+        
+        if (!empty($project_id)) {
+            // Register the script first
+            wp_register_script(
+                'smalk-analytics',
+                "https://api.smalk.ai/tracker.js?PROJECT_KEY={$project_id}",
+                array(),
+                SMALK_AI_WORDPRESS_PLUGIN_VERSION,
+                false // Place in head
+            );
+            
+            // Use the wp_print_scripts action to add the comment right before our script
+            add_action('wp_print_scripts', function() {
+                echo "\n<!-- Smalk AI Agent Analytics (https://www.smalk.ai) -->\n";
+            }, 1); // Priority 9 to ensure it runs before the script
+            
+            // Enqueue the script
+            wp_enqueue_script('smalk-analytics');
+        }
     }
 }
 
-add_action('wp_head', 'smalk_add_analytics_script_tag', 1);
+// Use wp_enqueue_scripts hook to register and enqueue
+add_action('wp_enqueue_scripts', 'smalk_add_analytics_script_tag', 1);
 
 // Helpers
 
