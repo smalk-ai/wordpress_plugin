@@ -1,7 +1,7 @@
 <?php
 
 /*
-Plugin Name: AI Agent Analytics by Smalk AI
+Plugin Name: Smalk AI Analytics
 Description: Get realtime analytics on the AI agents, crawlers, scrapers, and other bots visiting your website and manage your brand visibility on Answer Engines (ChatGPT, Perplexity, etc.)
 Version: 1.0.1
 Author URI: https://www.smalk.ai
