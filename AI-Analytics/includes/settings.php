@@ -147,16 +147,26 @@ function smalk_page() {
         <div class="header-container">
             <?php 
             $logo_url = SMALK_AI_LOGO_URL;
+            $logo_filename = basename($logo_url);
             
-            // Try to get image from media library first
-            $attachment_id = attachment_url_to_postid(esc_url($logo_url));
+            // First try to find existing attachment by filename
+            $args = array(
+                'post_type' => 'attachment',
+                'post_status' => 'inherit',
+                'posts_per_page' => 1,
+                'title' => pathinfo($logo_filename, PATHINFO_FILENAME) // Remove extension
+            );
+            
+            $existing_attachment = get_posts($args);
+            $attachment_id = !empty($existing_attachment) ? $existing_attachment[0]->ID : attachment_url_to_postid(esc_url($logo_url));
+            
             if ($attachment_id) {
                 echo wp_get_attachment_image(
                     $attachment_id,
-                    array(50, 50), // Set specific dimensions
+                    array(50, 50),
                     false,
                     array(
-                        'style' => 'height: 2rem; width: auto;', // Maintain aspect ratio
+                        'style' => 'height: 2rem; width: auto;',
                         'alt' => 'Smalk AI Logo',
                         'width' => '50',
                         'height' => '50'
@@ -173,20 +183,20 @@ function smalk_page() {
                 
                 if (!is_wp_error($tmp)) {
                     $file_array = array(
-                        'name' => basename($logo_url),
+                        'name' => $logo_filename,
                         'tmp_name' => $tmp
                     );
                     
-                    // Create the attachment
+                    // Create the attachment only if it doesn't exist
                     $attachment_id = media_handle_sideload($file_array, 0);
                     
                     if (!is_wp_error($attachment_id)) {
                         echo wp_get_attachment_image(
                             $attachment_id,
-                            array(50, 50), // Set specific dimensions
+                            array(50, 50),
                             false,
                             array(
-                                'style' => 'height: 2rem; width: auto;', // Maintain aspect ratio
+                                'style' => 'height: 2rem; width: auto;',
                                 'alt' => 'Smalk AI Logo',
                                 'width' => '50',
                                 'height' => '50'
