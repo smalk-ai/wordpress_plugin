@@ -3,13 +3,13 @@
 /*
 Plugin Name: Smalk AI Analytics
 Description: Get realtime analytics on the AI agents, crawlers, scrapers, and other bots visiting your website and manage your brand visibility on Answer Engines (ChatGPT, Perplexity, etc.)
-Version: 1.0.1
+Version: 1.0.4
 Author URI: https://www.smalk.ai
 Author: Smalk AI
 Requires at least: 5.0
 Tested up to: 6.7
 Requires PHP: 7.0
-Stable tag: 1.0.1
+Stable tag: 1.0.4
 License: GPLv3
 License URI: http://www.gnu.org/licenses/gpl.html
 */
