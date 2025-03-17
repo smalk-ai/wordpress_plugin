@@ -1,4 +1,5 @@
 <?php
+if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 
 // Server Analytics
 
@@ -39,43 +40,54 @@ add_action('wp_loaded', 'smalk_send_visit_request');
 // Client Analytics
 
 function smalk_add_analytics_script_tag() {
-    $should_add_analytics_script_tag = smalk_is_analytics_enabled_and_allowed();
-    
-    if ($should_add_analytics_script_tag) {
+    if ( smalk_is_analytics_enabled_and_allowed() ) {
         $project_id = smalk_get_user_analytics_script_tag();
-        
-        if (!empty($project_id)) {
-            // Register the script first
+        if ( !empty($project_id) ) {
+            // Register the script.
             wp_register_script(
                 'smalk-analytics',
                 "https://api.smalk.ai/tracker.js?PROJECT_KEY={$project_id}",
                 array(),
                 SMALK_AI_WORDPRESS_PLUGIN_VERSION,
-                false // Place in head
+                false // Load in head.
             );
             
-            // Use the wp_print_scripts action to add the comment right before our script
-            add_action('wp_print_scripts', function() {
-                echo "\n<!-- Smalk AI Agent Analytics (https://www.smalk.ai) -->\n";
-            }, 1); // Priority 9 to ensure it runs before the script
+            // Add inline JavaScript (a comment in this case) using wp_add_inline_script.
+            wp_add_inline_script(
+                'smalk-analytics',
+                '/* Smalk AI Agent Analytics (https://www.smalk.ai) */',
+                'before'
+            );
             
-            // Enqueue the script
+            // Enqueue the script.
             wp_enqueue_script('smalk-analytics');
         }
     }
 }
-
-// Use wp_enqueue_scripts hook to register and enqueue
 add_action('wp_enqueue_scripts', 'smalk_add_analytics_script_tag', 1);
 
 // Helpers
 
 function smalk_get_request_headers() {
     $header_names = [
+        // User Agent Information
         'User-Agent',
+        'Sec-Ch-Ua', // Browser brand and version
+        'Sec-Ch-Ua-Platform', // Operating system
+        // Navigation & Referral
         'Referer',
+        'Origin',
         'From',
+        // Language & Locale
+        'Accept-Language',
+        'Content-Language',
+        // Geolocation Headers
         'X-Country-Code',
+        'CF-IPCountry',           // Cloudflare country code
+        'X-Geo-Country',          // Generic geo country header
+        'X-Geo-City',             // City information
+        'X-Geo-Region',           // Region/State information
+        // IP-related Headers
         'Remote-Addr',
         'X-Forwarded-For',
         'X-Real-IP',
@@ -86,7 +98,10 @@ function smalk_get_request_headers() {
         'X-Original-Forwarded-For',
         'Fastly-Client-IP',
         'True-Client-IP',
-        'X-Appengine-User-IP'
+        'X-Appengine-User-IP',
+        // Connection Information
+        'Connection',
+        'Via' // Proxy information
     ];
 
     $request_headers = [];

@@ -1,0 +1,74 @@
+/* admin-styles.css */
+.fake-header {
+    display: none;
+}
+.container {
+    max-width: 40rem;
+    margin-left: auto;
+    margin-right: auto;
+}
+.header-container {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+    margin-top: 2rem;
+    margin-bottom: 1rem;
+}
+.header-container img {
+    height: 2rem;
+}
+.header-container h1 {
+    padding: 0;
+}
+.header-container a {
+    margin-left: auto;
+}
+h1 {
+    font-weight: bold !important;
+}
+h2 {
+    font-weight: bold;
+}
+hr {
+    border: none;
+    height: 1px;
+    background-color: rgba(0, 0, 0, 0.2);
+    margin-top: 1rem;
+    margin-bottom: 1rem;
+}
+input[type="text"] {
+    width: 100%;
+}
+input[type="checkbox"]:disabled {
+    border-color: revert;
+    opacity: revert;
+}
+table {
+    width: 100%;
+    border-collapse: collapse;
+    text-align: left;
+}
+table, th, td {
+    border: 1px solid rgba(0, 0, 0, 0.2);
+}
+th, td {
+    padding: 1rem;
+}
+th {
+    background-color: rgba(0, 0, 0, 0.05);
+}
+td p {
+    color: rgba(0, 0, 0, 0.5);
+}
+td p:first-child {
+    margin-top: 0;
+}
+td p:last-child {
+    margin-bottom: 0;
+}
+.table-header-step-number-label {
+    margin-bottom: 0.5rem;
+}
+.table-header-step-text-label {
+    font-weight: normal;
+}

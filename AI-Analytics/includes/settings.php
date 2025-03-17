@@ -1,4 +1,5 @@
 <?php
+if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 
 // Registration
 
@@ -62,157 +63,97 @@ function smalk_menu() {
 
 add_action('admin_menu', 'smalk_menu');
 
+// Enqueue CSS for Admin Page
+function smalk_admin_enqueue_scripts($hook) {
+    // Only load on this plugin’s admin page.
+    if ( $hook !== 'toplevel_page_smalk-ai' ) {
+        return;
+    }
+    wp_enqueue_style(
+        'smalk-admin-style',
+        plugin_dir_url( dirname(__FILE__) ) . 'css/admin-styles.css',
+        array(),
+        SMALK_AI_WORDPRESS_PLUGIN_VERSION
+    );
+}
+add_action('admin_enqueue_scripts', 'smalk_admin_enqueue_scripts');
+
 // Settings Page
 
 function smalk_page() {
     ?>
-    <style>
-        .fake-header {
-            display: none;
-        }
-        .container {
-            max-width: 40rem;
-            margin-left: auto;
-            margin-right: auto;
-        }
-        .header-container {
-            display: flex;
-            gap: 1rem;
-            align-items: center;
-            margin-top: 2rem;
-            margin-bottom: 1rem;
-        }
-        .header-container img {
-            height: 2rem;
-        }
-        .header-container h1 {
-            padding: 0;
-        }
-        .header-container a {
-            margin-left: auto;
-        }
-        h1 {
-            font-weight: bold !important;
-        }
-        h2 {
-            font-weight: bold;
-        }
-        hr {
-            border: none;
-            height: 1px;
-            background-color: rgba(0, 0, 0, 0.2);
-            margin-top: 1rem;
-            margin-bottom: 1rem;
-        }
-        input[type="text"] {
-            width: 100%;
-        }
-        input[type="checkbox"]:disabled {
-            border-color: revert;
-            opacity: revert;
-        }
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            text-align: left;
-        }
-        table, th, td {
-            border: 1px solid rgba(0, 0, 0, 0.2);
-        }
-        th, td {
-            padding: 1rem;
-        }
-        th {
-            background-color: rgba(0, 0, 0, 0.05);
-        }
-        td p {
-            color: rgba(0, 0, 0, 0.5);
-        }
-        td p:first-child {
-            margin-top: 0;
-        }
-        td p:last-child {
-            margin-bottom: 0;
-        }
-        .table-header-step-number-label {
-            margin-bottom: 0.5rem;
-        }
-        .table-header-step-text-label {
-            font-weight: normal;
-        }
-    </style>
     <div class="wrap">
         <h1 class="fake-header"></h1>
         <div class="container">
-        <div class="header-container">
-            <?php 
-            $logo_url = SMALK_AI_LOGO_URL;
-            $logo_filename = basename($logo_url);
-            
-            // First try to find existing attachment by filename
-            $args = array(
-                'post_type' => 'attachment',
-                'post_status' => 'inherit',
-                'posts_per_page' => 1,
-                'title' => pathinfo($logo_filename, PATHINFO_FILENAME) // Remove extension
-            );
-            
-            $existing_attachment = get_posts($args);
-            $attachment_id = !empty($existing_attachment) ? $existing_attachment[0]->ID : attachment_url_to_postid(esc_url($logo_url));
-            
-            if ($attachment_id) {
-                echo wp_get_attachment_image(
-                    $attachment_id,
-                    array(50, 50),
-                    false,
-                    array(
-                        'style' => 'height: 2rem; width: auto;',
-                        'alt' => 'Smalk AI Logo',
-                        'width' => '50',
-                        'height' => '50'
-                    )
+            <div class="header-container">
+                <?php 
+                $logo_url = SMALK_AI_LOGO_URL;
+                $logo_filename = basename($logo_url);
+                
+                // First try to find existing attachment by filename
+                $args = array(
+                    'post_type' => 'attachment',
+                    'post_status' => 'inherit',
+                    'posts_per_page' => 1,
+                    'title' => pathinfo($logo_filename, PATHINFO_FILENAME) // Remove extension
                 );
-            } else {
-                // If not in media library, create a temporary attachment
-                require_once(ABSPATH . 'wp-admin/includes/media.php');
-                require_once(ABSPATH . 'wp-admin/includes/file.php');
-                require_once(ABSPATH . 'wp-admin/includes/image.php');
                 
-                // Download file to temp location
-                $tmp = download_url(esc_url($logo_url));
+                $existing_attachment = get_posts($args);
+                $attachment_id = !empty($existing_attachment) ? $existing_attachment[0]->ID : attachment_url_to_postid(esc_url($logo_url));
                 
-                if (!is_wp_error($tmp)) {
-                    $file_array = array(
-                        'name' => $logo_filename,
-                        'tmp_name' => $tmp
+                if ($attachment_id) {
+                    echo wp_get_attachment_image(
+                        $attachment_id,
+                        array(50, 50),
+                        false,
+                        array(
+                            'style' => 'height: 2rem; width: auto;',
+                            'alt' => 'Smalk AI Logo',
+                            'width' => '50',
+                            'height' => '50'
+                        )
                     );
+                } else {
+                    // If not in media library, create a temporary attachment
+                    require_once(ABSPATH . 'wp-admin/includes/media.php');
+                    require_once(ABSPATH . 'wp-admin/includes/file.php');
+                    require_once(ABSPATH . 'wp-admin/includes/image.php');
                     
-                    // Create the attachment only if it doesn't exist
-                    $attachment_id = media_handle_sideload($file_array, 0);
+                    // Download file to temp location
+                    $tmp = download_url(esc_url($logo_url));
                     
-                    if (!is_wp_error($attachment_id)) {
-                        echo wp_get_attachment_image(
-                            $attachment_id,
-                            array(50, 50),
-                            false,
-                            array(
-                                'style' => 'height: 2rem; width: auto;',
-                                'alt' => 'Smalk AI Logo',
-                                'width' => '50',
-                                'height' => '50'
-                            )
+                    if (!is_wp_error($tmp)) {
+                        $file_array = array(
+                            'name' => $logo_filename,
+                            'tmp_name' => $tmp
                         );
+                        
+                        // Create the attachment only if it doesn't exist
+                        $attachment_id = media_handle_sideload($file_array, 0);
+                        
+                        if (!is_wp_error($attachment_id)) {
+                            echo wp_get_attachment_image(
+                                $attachment_id,
+                                array(50, 50),
+                                false,
+                                array(
+                                    'style' => 'height: 2rem; width: auto;',
+                                    'alt' => 'Smalk AI Logo',
+                                    'width' => '50',
+                                    'height' => '50'
+                                )
+                            );
+                        }
+                        
+                        // Clean up temp file
+                        wp_delete_file($tmp);
                     }
-                    
-                    // Clean up temp file
-                    wp_delete_file($tmp);
                 }
-            }
-            ?>
-        <h1>Smalk AI Agent Analytics</h1>
+                ?>
+                <h1>Smalk AI Agent Analytics</h1>
                 <a href="https://www.smalk.ai" target="_blank">Go to the Smalk AI Website</a>
             </div>
-            <p>Gain real-time insights into AI agents, crawlers, and scrapers accessing your website—and take control of your visibility in the AI-powered search era.</p>
+            <p>Get real-time analytics on AI agents and human visitors from AI Search, and control your brand visibility on Answer Engines (ChatGPT, Perplexity, etc.).</p>
             <h2>Configuration</h2>
             <form method="post" action="options.php" class="smalk-form">
                 <?php settings_fields(SMALK_AI_SETTINGS_GROUP); ?>
@@ -224,7 +165,7 @@ function smalk_page() {
                         </th>
                         <td>
                             <p>
-                                <a href="https://www.app.smalk.ai/login" target="_blank">Sign up</a> for Smalk AI Agent Analytics and create a new project for this website. This will take less than 30 seconds.
+                                <a href="https://app.smalk.ai/" target="_blank">Sign up</a> for Smalk AI Agent Analytics and create a new project for this website. This will take less than 30 seconds.
                             </p>
                         </td>
                     </tr>
@@ -240,7 +181,7 @@ function smalk_page() {
                                 name="<?php echo esc_attr(SMALK_AI_ACCESS_TOKEN); ?>" 
                                 value="<?php echo esc_attr(get_option(SMALK_AI_ACCESS_TOKEN, '')); ?>"
                             />
-                            <p>Create & Copy your API Key from your Smalk AI project's settings page (Settings -> API Keys).</p>
+                            <p>Create &amp; Copy your API Key from your Smalk AI project's settings page (Settings -&gt; API Keys).</p>
                         </td>
                     </tr>
                     <tr>
@@ -265,9 +206,9 @@ function smalk_page() {
                     </tr>
                 </table>
 
-                   <!-- Added button below the table -->
-                    <a 
-                    href="https://app.smalk.ai/login" 
+                <!-- Added button below the table -->
+                <a 
+                    href="https://app.smalk.ai/" 
                     target="_blank" 
                     style="
                         display: inline-block; 
