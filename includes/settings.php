@@ -25,13 +25,9 @@ function smalk_register_settings() {
 
     register_setting(
         SMALK_AI_SETTINGS_GROUP,
-        SMALK_AI_ACCESS_TOKEN,
-        SMALK_AI_ACCESS_TOKEN_ARGS
-    );
-
-    register_setting(
-        SMALK_AI_SETTINGS_GROUP,
         SMALK_AI_IS_ANALYTICS_ENABLED,
+        SMALK_AI_ACCESS_TOKEN,
+        SMALK_AI_ACCESS_TOKEN_ARGS,
         SMALK_AI_ANALYTICS_ENABLED_ARGS
     );
 }
