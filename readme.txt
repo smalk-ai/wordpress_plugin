@@ -3,9 +3,9 @@ Contributors: smalker001
 Website: https://www.smalk.ai
 Tags: ai analytics, ai search, ai engines, generative ai, seo
 Requires at least: 5.0
-Tested up to: 6.7
+Tested up to: 6.8
 Requires PHP: 7.0
-Stable tag: 1.0.5
+Stable tag: 1.0.6
 License: GPLv3
 License URI: http://www.gnu.org/licenses/gpl.html
 
@@ -75,6 +75,9 @@ For more information about our data handling practices, please visit:
   - The performance and relevance of your website in the age of AI
 
 == CHANGELOG ==
+**1.0.6**
+- Fix bug with Cache Plugins
+
 **1.0.5**
 - Add Debuging Mode
 
