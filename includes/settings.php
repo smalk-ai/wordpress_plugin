@@ -3,8 +3,13 @@ if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 
 // Registration
 
+// First, define the sanitization function
+function smalk_sanitize_checkbox($input) {
+    return $input === '1' ? '1' : '0';
+}
+
 function smalk_register_settings() {
-    // Define settings arguments as constants
+    // Then define settings arguments
     define('SMALK_AI_ACCESS_TOKEN_ARGS', array(
         'type' => 'string',
         'group' => SMALK_AI_SETTINGS_GROUP,
@@ -18,22 +23,28 @@ function smalk_register_settings() {
         'type' => 'boolean',
         'group' => SMALK_AI_SETTINGS_GROUP,
         'description' => 'Enable/Disable Analytics',
-        'sanitize_callback' => 'smalk_sanitize_checkbox',
+        'sanitize_callback' => 'smalk_sanitize_checkbox',  // Now the function exists
         'show_in_rest' => false,
         'default' => '1'
     ));
 
+    // Register settings...
+    register_setting(
+        SMALK_AI_SETTINGS_GROUP,
+        SMALK_AI_ACCESS_TOKEN,
+        SMALK_AI_ACCESS_TOKEN_ARGS
+    );
+
     register_setting(
         SMALK_AI_SETTINGS_GROUP,
         SMALK_AI_IS_ANALYTICS_ENABLED,
-        SMALK_AI_ACCESS_TOKEN,
-        SMALK_AI_ACCESS_TOKEN_ARGS,
         SMALK_AI_ANALYTICS_ENABLED_ARGS
     );
 }
 
-function smalk_sanitize_checkbox($input) {
-    return isset($input) ? '1' : '0';
+// Move this outside the function
+if (get_option(SMALK_AI_IS_ANALYTICS_ENABLED) === false) {
+    add_option(SMALK_AI_IS_ANALYTICS_ENABLED, '1');
 }
 
 add_action('admin_init', 'smalk_register_settings');
@@ -187,13 +198,18 @@ function smalk_page() {
                             <div class="table-header-step-text-label">Set Up AI Agent Analytics</div>
                         </th>
                         <td>
-                            <input
-                                type="checkbox"
-                                id="<?php echo esc_attr(SMALK_AI_IS_ANALYTICS_ENABLED); ?>"
-                                name="<?php echo esc_attr(SMALK_AI_IS_ANALYTICS_ENABLED); ?>"
-                                <?php checked(get_option(SMALK_AI_IS_ANALYTICS_ENABLED, '1') === '1'); ?>
-                                value="1"
-                            />
+                        <input
+                        type="hidden"
+                        name="<?php echo esc_attr(SMALK_AI_IS_ANALYTICS_ENABLED); ?>"
+                        value="0"
+                        />
+                        <input
+                            type="checkbox"
+                            id="<?php echo esc_attr(SMALK_AI_IS_ANALYTICS_ENABLED); ?>"
+                            name="<?php echo esc_attr(SMALK_AI_IS_ANALYTICS_ENABLED); ?>"
+                            <?php checked(get_option(SMALK_AI_IS_ANALYTICS_ENABLED, '1') === '1'); ?>
+                            value="1"
+                        />
                             <label for="<?php echo esc_attr(SMALK_AI_IS_ANALYTICS_ENABLED); ?>">
                                 Enable Agent Analytics
                             </label>
