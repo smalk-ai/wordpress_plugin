@@ -15,7 +15,6 @@ function smalk_get_user_is_analytics_disallowed() {
         $user = smalk_get_user();
         return isset($user['is_analytics_allowed']) ? !$user['is_analytics_allowed'] : false;
     } else {
-        // If no access token, treat analytics as disallowed.
         return true;
     }
 }
@@ -58,32 +57,6 @@ function smalk_clear_caches($option_name) {
     }
 }
 add_action('update_option', 'smalk_clear_caches');
-
-
-function smalk_get_robots_txt() {
-    $access_token = get_option(SMALK_AI_ACCESS_TOKEN);
-    
-    if (!$access_token) {
-        return '';
-    }
-    
-    $api_url = 'https://api.smalk.ai/api/v1/robots-txt';
-    
-    $headers = array(
-        'Content-Type' => 'application/json',
-        'Authorization' => 'Api-Key ' . $access_token
-    );
-    
-    $response = wp_remote_get($api_url, array(
-        'headers' => $headers
-    ));
-    
-    if (smalk_is_network_response_code_successful($response)) {
-        return wp_remote_retrieve_body($response);
-    }
-    
-    return '';
-}
 
 // Helpers
 
