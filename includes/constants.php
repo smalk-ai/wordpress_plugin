@@ -19,7 +19,6 @@ define('SMALK_AI_IS_ANALYTICS_ENABLED', 'smalk_ai_is_analytics_enabled');
 // Cached Item Options
 
 define('SMALK_AI_USER', 'smalk_ai_user');
-define('SMALK_AI_ROBOTS_TXT', 'smalk_ai_robots_txt');
 
 // Cron Job Events
 
