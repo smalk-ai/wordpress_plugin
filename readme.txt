@@ -1,11 +1,11 @@
 === Smalk AI Analytics ===
 Contributors: smalker001
 Website: https://www.smalk.ai
-Tags: ai analytics, ai search, ai engines, generative ai, seo
+Tags: GEO,Crawlers,AI SEO
 Requires at least: 5.0
 Tested up to: 6.8
 Requires PHP: 7.0
-Stable tag: 1.0.7
+Stable tag: 1.0.9
 License: GPLv3
 License URI: http://www.gnu.org/licenses/gpl.html
 
@@ -75,6 +75,15 @@ For more information about our data handling practices, please visit:
   - The performance and relevance of your website in the age of AI
 
 == CHANGELOG ==
+**1.0.9**
+- Remove unnecessary code for robots.txt
+
+**1.0.8**
+- Fix bug with Cache Plugins and robots.txt
+
+**1.0.7**
+- Fix bug with Cache Plugins
+
 **1.0.6**
 - Fix bug with Cache Plugins
 
