@@ -1,9 +1,15 @@
 <?php
 if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 
-// Server Analytics
+// INTEGRATED SOLUTIONS 1, 2, 3: Cache-Resistant Analytics
 
+// SOLUTION 2: Server Analytics - Non-Blocking with Cache Bypass and Deduplication
 function smalk_send_visit_request() {
+    // Check if we already sent a request for this session to avoid duplicates
+    if (isset($_SESSION['smalk_tracking_sent']) && $_SESSION['smalk_tracking_sent'] === true) {
+        return;
+    }
+
     $access_token = get_option(SMALK_AI_ACCESS_TOKEN);
     $user_agent = isset($_SERVER['HTTP_USER_AGENT']) ? sanitize_text_field(wp_unslash($_SERVER['HTTP_USER_AGENT'])) : false;
 
@@ -14,80 +20,388 @@ function smalk_send_visit_request() {
     $request_headers = smalk_get_request_headers();
 
     // Send the visit request if needed
-
     if ($should_send_visit_request && $access_token && $request_path && $request_method && !smalk_is_system_request($request_path)) {
+        // Mark as sent to prevent duplicates
+        if (!session_id()) {
+            session_start();
+        }
+        $_SESSION['smalk_tracking_sent'] = true;
+
+        // Non-blocking request with cache-busting headers
         $headers = array(
             'Content-Type' => 'application/json',
-            'Authorization' => 'Api-Key ' . $access_token
+            'Authorization' => 'Api-Key ' . $access_token,
+            'Cache-Control' => 'no-cache, no-store, must-revalidate',
+            'Pragma' => 'no-cache',
+            'X-Requested-With' => 'XMLHttpRequest'
         );
 
         $body = array(
             'request_path' => $request_path,
             'request_method' => $request_method,
             'request_headers' => $request_headers,
-            'wordpress_plugin_version' => SMALK_AI_WORDPRESS_PLUGIN_VERSION
+            'wordpress_plugin_version' => SMALK_AI_WORDPRESS_PLUGIN_VERSION,
+            'timestamp' => time(),
+            'unique_id' => uniqid('smalk_', true),
+            'server_tracking' => true
         );
 
+        // Use non-blocking request to avoid cache interference
         wp_remote_post('https://api.smalk.ai/api/v1/tracking/visit', array(
             'headers' => $headers,
-            'body' => wp_json_encode($body)
+            'body' => wp_json_encode($body),
+            'timeout' => 1,
+            'blocking' => false,
+            'sslverify' => true,
+            'user-agent' => 'Smalk-Analytics/' . SMALK_AI_WORDPRESS_PLUGIN_VERSION
         ));
     }
 }
 
-add_action('wp_loaded', 'smalk_send_visit_request');
+// Hook to 'init' for better cache bypass
+add_action('init', 'smalk_send_visit_request', 1);
 
-// Client Analytics
+// Server-side tracking fallback via JavaScript (CORS-friendly)
+function smalk_server_side_tracking_fallback() {
+    if (!smalk_is_analytics_enabled_and_allowed()) {
+        return;
+    }
 
+    $access_token = get_option(SMALK_AI_ACCESS_TOKEN);
+    if (!$access_token) {
+        return;
+    }
+
+    $request_path = isset($_SERVER['REQUEST_URI']) ? sanitize_url(wp_unslash($_SERVER['REQUEST_URI'])) : '';
+    
+    // Skip system requests
+    if (smalk_is_system_request($request_path)) {
+        return;
+    }
+
+    // Generate tracking data
+    $tracking_data = array(
+        'request_path' => $request_path,
+        'request_method' => isset($_SERVER['REQUEST_METHOD']) ? sanitize_text_field(wp_unslash($_SERVER['REQUEST_METHOD'])) : '',
+        'request_headers' => smalk_get_request_headers(),
+        'wordpress_plugin_version' => SMALK_AI_WORDPRESS_PLUGIN_VERSION,
+        'timestamp' => time(),
+        'unique_id' => uniqid('smalk_fallback_', true),
+        'fallback_tracking' => true
+    );
+
+    // Output CORS-friendly JavaScript for server-side tracking fallback with deduplication
+    ?>
+    <script type="text/javascript">
+    (function() {
+        // Deduplication: only run fallback if main tracker hasn't loaded within 3 seconds
+        setTimeout(function() {
+            // Check if main tracker is working
+            if (!window.smalkTrackerLoaded && !window.smalkAnalyticsActive) {
+                try {
+                    var xhr = new XMLHttpRequest();
+                    xhr.open('POST', 'https://api.smalk.ai/api/v1/tracking/visit', true);
+                    xhr.setRequestHeader('Content-Type', 'application/json');
+                    xhr.setRequestHeader('Authorization', 'Api-Key <?php echo esc_js($access_token); ?>');
+                    
+                    xhr.onload = function() {
+                        if (xhr.status >= 200 && xhr.status < 300) {
+                            window.smalkFallbackSent = true;
+                        }
+                    };
+                    
+                    xhr.onerror = function() {
+                        // Silent fail
+                    };
+                    
+                    xhr.send(JSON.stringify(<?php echo wp_json_encode($tracking_data); ?>));
+                } catch(e) {
+                    // Silent fail
+                }
+            }
+        }, 3000); // Wait 3 seconds before fallback
+    })();
+    </script>
+    <?php
+}
+add_action('wp_footer', 'smalk_server_side_tracking_fallback', 999);
+
+// SOLUTION 1: Client Analytics - Enhanced Dynamic Script Loading
 function smalk_add_analytics_script_tag() {
-    if ( smalk_is_analytics_enabled_and_allowed() ) {
-        $project_id = smalk_get_user_analytics_script_tag();
-        if ( !empty($project_id) ) {
-            // Register the script.
-            wp_register_script(
-                'smalk-analytics',
-                "https://api.smalk.ai/tracker.js?PROJECT_KEY={$project_id}",
-                array(),
-                SMALK_AI_WORDPRESS_PLUGIN_VERSION,
-                false // Load in head.
-            );
-            
-            // Add inline JavaScript (a comment in this case) using wp_add_inline_script.
-            wp_add_inline_script(
-                'smalk-analytics',
-                '/* Smalk AI Agent Analytics (https://www.smalk.ai) */',
-                'before'
-            );
-            
-            // Enqueue the script.
-            wp_enqueue_script('smalk-analytics');
+    if (!smalk_is_analytics_enabled_and_allowed()) {
+        return;
+    }
+    
+    $project_id = smalk_get_user_analytics_script_tag();
+    if (empty($project_id)) {
+        return;
+    }
+
+    // Enhanced dynamic script loading with better execution handling
+    ?>
+    <script type="text/javascript">
+    /* Smalk AI Agent Analytics - Enhanced Dynamic Loading */
+    (function() {
+        // Check if already loaded to prevent duplicates
+        if (window.smalkAnalyticsLoaded) {
+            return;
         }
+        window.smalkAnalyticsLoaded = true;
+        
+        // Create script element
+        var script = document.createElement('script');
+        script.type = 'text/javascript';
+        script.async = true;
+        script.defer = false;
+        script.src = 'https://api.smalk.ai/tracker.js?PROJECT_KEY=<?php echo esc_js($project_id); ?>&ver=<?php echo esc_js(SMALK_AI_WORDPRESS_PLUGIN_VERSION); ?>';
+        script.id = 'smalk-analytics-dynamic';
+        
+        // Add attributes to prevent caching/minification
+        script.setAttribute('data-no-minify', '1');
+        script.setAttribute('data-cfasync', 'false');
+        script.setAttribute('data-no-optimize', '1');
+        script.setAttribute('data-skip-minification', '1');
+        
+        // Enhanced error and load handling
+        script.onload = function() {
+            // Set flag to prevent fallback tracking
+            window.smalkTrackerLoaded = true;
+            window.smalkAnalyticsActive = true;
+            
+            // Initialize tracker if needed
+            if (typeof window.smalkInit === 'function') {
+                try {
+                    window.smalkInit();
+                } catch(e) {
+                    // Silent fail
+                }
+            }
+        };
+        
+        script.onerror = function() {
+            // Fallback: try loading without cache busting
+            var fallbackScript = document.createElement('script');
+            fallbackScript.src = 'https://api.smalk.ai/tracker.js?PROJECT_KEY=<?php echo esc_js($project_id); ?>&ver=<?php echo esc_js(SMALK_AI_WORDPRESS_PLUGIN_VERSION); ?>';
+            fallbackScript.async = true;
+            document.head.appendChild(fallbackScript);
+        };
+        
+        // Enhanced loading strategy
+        function loadScript() {
+            var head = document.getElementsByTagName('head')[0];
+            if (head) {
+                head.appendChild(script);
+            } else {
+                // Wait for head to be available
+                var checkHead = setInterval(function() {
+                    var head = document.getElementsByTagName('head')[0];
+                    if (head) {
+                        clearInterval(checkHead);
+                        head.appendChild(script);
+                    }
+                }, 10);
+            }
+        }
+        
+        // Load immediately or wait for DOM
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', loadScript);
+        } else {
+            loadScript();
+        }
+        
+        // Additional fallback for very slow loading
+        setTimeout(function() {
+            if (!document.getElementById('smalk-analytics-dynamic')) {
+                loadScript();
+            }
+        }, 2000);
+        
+    })();
+    </script>
+    <?php
+}
+add_action('wp_head', 'smalk_add_analytics_script_tag', 999);
+
+// Alternative method: Traditional script enqueue as backup
+function smalk_add_analytics_script_backup() {
+    if (!smalk_is_analytics_enabled_and_allowed()) {
+        return;
+    }
+    
+    $project_id = smalk_get_user_analytics_script_tag();
+    if (empty($project_id)) {
+        return;
+    }
+
+    // Backup method using wp_enqueue_script with anti-cache measures
+    $script_url = "https://api.smalk.ai/tracker.js?PROJECT_KEY={$project_id}&ver=" . SMALK_AI_WORDPRESS_PLUGIN_VERSION;
+    
+    wp_register_script(
+        'smalk-analytics-backup',
+        $script_url,
+        array(),
+        SMALK_AI_WORDPRESS_PLUGIN_VERSION,
+        false // Load in head
+    );
+    
+    // Add multiple data attributes to prevent minification
+    wp_script_add_data('smalk-analytics-backup', 'data-no-minify', '1');
+    wp_script_add_data('smalk-analytics-backup', 'data-cfasync', 'false');
+    wp_script_add_data('smalk-analytics-backup', 'data-no-optimize', '1');
+    wp_script_add_data('smalk-analytics-backup', 'data-skip-minification', '1');
+    
+    wp_enqueue_script('smalk-analytics-backup');
+    
+    // Add inline script to initialize if needed
+    wp_add_inline_script('smalk-analytics-backup', 
+        '/* Smalk Analytics Backup Method */ 
+        console.log("Smalk Analytics: Backup script loaded");
+        if (typeof window.smalkInit === "function") { 
+            try { window.smalkInit(); } catch(e) { console.warn("Smalk init error:", e); } 
+        }', 
+        'after'
+    );
+}
+// Uncomment the line below to enable backup method
+// add_action('wp_enqueue_scripts', 'smalk_add_analytics_script_backup', 999);
+
+// SOLUTION 3: Cache Plugin Exclusions
+function smalk_exclude_from_cache_plugins() {
+    // Exclude from WP Rocket minification
+    if (function_exists('rocket_exclude_js')) {
+        rocket_exclude_js(array('api.smalk.ai/tracker.js'));
+    }
+    
+    // WP Rocket - exclude from minification via filter
+    add_filter('rocket_exclude_js', function($excluded_js) {
+        $excluded_js[] = 'api.smalk.ai/tracker.js';
+        $excluded_js[] = 'smalk-analytics';
+        return $excluded_js;
+    });
+    
+    // Exclude from Autoptimize
+    add_filter('autoptimize_filter_js_exclude', function($exclude) {
+        return $exclude . ', api.smalk.ai/tracker.js, smalk-analytics';
+    });
+    
+    // Exclude from W3 Total Cache
+    add_filter('w3tc_minify_js_do_tag_minification', function($do_tag_minification, $script_tag) {
+        if (strpos($script_tag, 'api.smalk.ai/tracker.js') !== false || 
+            strpos($script_tag, 'smalk-analytics') !== false ||
+            strpos($script_tag, 'data-no-minify') !== false) {
+            return false;
+        }
+        return $do_tag_minification;
+    }, 10, 2);
+    
+    // LiteSpeed Cache exclusions
+    add_filter('litespeed_optimize_js_excludes', function($excludes) {
+        $excludes[] = 'api.smalk.ai/tracker.js';
+        $excludes[] = 'smalk-analytics';
+        return $excludes;
+    });
+    
+    // WP Fastest Cache exclusions
+    add_filter('wpfc_exclude_current_page', function($exclude) {
+        if (strpos($_SERVER['REQUEST_URI'], 'smalk') !== false) {
+            return true;
+        }
+        return $exclude;
+    });
+    
+    // Exclude from WP Super Cache for pages with smalk tracking
+    if (function_exists('wp_cache_no_cache_for_me')) {
+        add_action('wp_head', function() {
+            if (smalk_is_analytics_enabled_and_allowed()) {
+                wp_cache_no_cache_for_me();
+            }
+        }, 1);
+    }
+    
+    // SG Optimizer exclusions
+    add_filter('sgo_js_minify_exclude', function($exclude_list) {
+        $exclude_list[] = 'api.smalk.ai/tracker.js';
+        $exclude_list[] = 'smalk-analytics';
+        return $exclude_list;
+    });
+    
+    // Hummingbird exclusions
+    add_filter('wp_hummingbird_is_minify_excluded_url', function($excluded, $url) {
+        if (strpos($url, 'api.smalk.ai/tracker.js') !== false) {
+            return true;
+        }
+        return $excluded;
+    }, 10, 2);
+    
+    // Flying Press exclusions
+    add_filter('flying_press_exclude_js', function($excludes) {
+        $excludes[] = 'api.smalk.ai/tracker.js';
+        return $excludes;
+    });
+    
+    // Asset CleanUp exclusions
+    add_filter('wpacu_skip_assets_settings_call', function($skip, $data) {
+        if (isset($data['handle']) && strpos($data['handle'], 'smalk') !== false) {
+            return true;
+        }
+        return $skip;
+    }, 10, 2);
+}
+add_action('init', 'smalk_exclude_from_cache_plugins', 1);
+
+// Additional cache bypass for specific cache plugins
+function smalk_additional_cache_bypass() {
+    // Define no-cache constants for various plugins
+    if (!defined('DONOTCACHEPAGE')) {
+        define('DONOTCACHEPAGE', true);
+    }
+    if (!defined('DONOTCACHEOBJECT')) {
+        define('DONOTCACHEOBJECT', true);
+    }
+    if (!defined('DONOTCACHEDB')) {
+        define('DONOTCACHEDB', true);
+    }
+    
+    // Set headers to prevent caching of tracking requests
+    if (smalk_is_analytics_enabled_and_allowed()) {
+        add_action('send_headers', function() {
+            if (!headers_sent()) {
+                header('Cache-Control: no-cache, no-store, must-revalidate', false);
+                header('Pragma: no-cache', false);
+                header('Expires: 0', false);
+            }
+        });
     }
 }
-add_action('wp_enqueue_scripts', 'smalk_add_analytics_script_tag', 1);
+add_action('template_redirect', 'smalk_additional_cache_bypass', 1);
 
-// Helpers
+// Force script attributes to prevent minification
+function smalk_add_script_attributes($tag, $handle, $src) {
+    // Add attributes to prevent caching and minification
+    if (strpos($handle, 'smalk') !== false || strpos($src, 'api.smalk.ai') !== false) {
+        $tag = str_replace('<script', '<script data-no-minify="1" data-cfasync="false" data-no-optimize="1"', $tag);
+    }
+    return $tag;
+}
+add_filter('script_loader_tag', 'smalk_add_script_attributes', 10, 3);
 
+// Helpers (keeping your original functions)
 function smalk_get_request_headers() {
     $header_names = [
-        // User Agent Information
         'User-Agent',
-        'Sec-Ch-Ua', // Browser brand and version
-        'Sec-Ch-Ua-Platform', // Operating system
-        // Navigation & Referral
+        'Sec-Ch-Ua',
+        'Sec-Ch-Ua-Platform',
         'Referer',
         'Origin',
         'From',
-        // Language & Locale
         'Accept-Language',
         'Content-Language',
-        // Geolocation Headers
         'X-Country-Code',
-        'CF-IPCountry',           // Cloudflare country code
-        'X-Geo-Country',          // Generic geo country header
-        'X-Geo-City',             // City information
-        'X-Geo-Region',           // Region/State information
-        // IP-related Headers
+        'CF-IPCountry',
+        'X-Geo-Country',
+        'X-Geo-City',
+        'X-Geo-Region',
         'Remote-Addr',
         'X-Forwarded-For',
         'X-Real-IP',
@@ -99,16 +413,14 @@ function smalk_get_request_headers() {
         'Fastly-Client-IP',
         'True-Client-IP',
         'X-Appengine-User-IP',
-        // Connection Information
         'Connection',
-        'Via' // Proxy information
+        'Via'
     ];
 
     $request_headers = [];
 
     foreach ($header_names as $header_name) {
         $header_value = smalk_get_request_header_value($header_name);
-
         if ($header_value) {
             $request_headers[$header_name] = $header_value;
         }
@@ -130,13 +442,10 @@ function smalk_get_request_header_value($header_name) {
         $lowercased_header_name = strtolower($header_name);
 
         if (isset($headers_with_lowercase_keys[$lowercased_header_name])) {
-            return $headers_with_lowercase_keys[$lowercased_header_name];
-        } else {
-            return null;
+            return sanitize_text_field($headers_with_lowercase_keys[$lowercased_header_name]);
         }
-    } else {
-        return null;
     }
+    return null;
 }
 
 function smalk_is_system_request($request_path) {
