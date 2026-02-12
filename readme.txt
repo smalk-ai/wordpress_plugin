@@ -1,11 +1,11 @@
 === Smalk AI Analytics ===
 Contributors: smalker001
 Website: https://www.smalk.ai
-Tags: GEO,Crawlers,AI SEO
+Tags: Generative Engine Optimization,AI Crawlers,Answer Engine Optimization
 Requires at least: 5.0
 Tested up to: 6.8
 Requires PHP: 7.0
-Stable tag: 1.0.9
+Stable tag: 1.0.12
 License: GPLv3
 License URI: http://www.gnu.org/licenses/gpl.html
 
@@ -40,13 +40,10 @@ This plugin connects to Smalk AI's API services for analytics and tracking funct
    - Data sent includes: visit information, page URLs, and user agent data
 
 2. Project Configuration:
-   - The plugin connects to the Smalk API to retrieve project settings and configurations
+   - The plugin connects to the Smalk API to retrieve project settings when the API key is saved or updated
+   - Project data is cached locally and reused — no API calls are made on page loads
    - Only authenticated API requests are made using your project key
    - No personal user data is transmitted during these requests
-
-3. Robots.txt Management:
-   - The plugin connects to the Smalk API to manage robots.txt configurations related to AI Engines
-   - Only authenticated API requests are made using your project key
 
 For more information about our data handling practices, please visit:
 - Terms of Service: https://smalkapp.notion.site/Terms-of-service-Smalk-9f047b4200b84b70a4fb38142cfb5799
@@ -75,6 +72,18 @@ For more information about our data handling practices, please visit:
   - The performance and relevance of your website in the age of AI
 
 == CHANGELOG ==
+**1.0.12**
+- Fix: use cached project ID instead of calling the API on every page load
+- Fix: add trailing slashes to all API endpoint URLs to avoid 301 redirects
+- Fix: use centralized Smalk_API class for all endpoint URLs instead of hardcoded strings
+- Remove: robots.txt management section (feature removed in 1.0.9)
+
+**1.0.11**
+- Bug fix
+
+**1.0.10**
+- Remove PHPSESSION cookie.
+
 **1.0.9**
 - Remove unnecessary code for robots.txt
 

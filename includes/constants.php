@@ -3,7 +3,7 @@ if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 
 // General
 
-define('SMALK_AI_WORDPRESS_PLUGIN_VERSION', '1.0.1');
+define('SMALK_AI_WORDPRESS_PLUGIN_VERSION', '1.0.12');
 define('SMALK_AI_LOGO_PATH', plugin_dir_path(SMALK_AI_PLUGIN_FILE) . 'assets/Logo_512x512_remove_bg.svg');
 define('SMALK_AI_LOGO_URL', plugin_dir_url(SMALK_AI_PLUGIN_FILE) . 'assets/Logo_512x512_remove_bg.svg');
 
