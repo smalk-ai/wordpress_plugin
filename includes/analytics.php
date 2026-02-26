@@ -25,7 +25,9 @@ function smalk_send_visit_request() {
             'Authorization' => 'Api-Key ' . $access_token,
             'Cache-Control' => 'no-cache, no-store, must-revalidate',
             'Pragma' => 'no-cache',
-            'X-Requested-With' => 'XMLHttpRequest'
+            'X-Requested-With' => 'XMLHttpRequest',
+            'X-Smalk-CMS' => 'wordpress/' . get_bloginfo('version'),
+            'X-Smalk-Plugin-Version' => SMALK_AI_WORDPRESS_PLUGIN_VERSION,
         );
 
         $body = array(
@@ -59,72 +61,8 @@ function smalk_send_visit_request() {
 // Hook to 'init' for better cache bypass
 add_action('init', 'smalk_send_visit_request', 1);
 
-// Server-side tracking fallback via JavaScript (CORS-friendly)
-function smalk_server_side_tracking_fallback() {
-    if (!smalk_is_analytics_enabled_and_allowed()) {
-        return;
-    }
+// Client Analytics - Dynamic Script Loading (loads tracker.js which handles all browser-side tracking)
 
-    $access_token = get_option(SMALK_AI_ACCESS_TOKEN);
-    if (!$access_token) {
-        return;
-    }
-
-    $request_path = isset($_SERVER['REQUEST_URI']) ? sanitize_url(wp_unslash($_SERVER['REQUEST_URI'])) : '';
-    
-    // Skip system requests
-    if (smalk_is_system_request($request_path)) {
-        return;
-    }
-
-    // Generate tracking data
-    $tracking_data = array(
-        'request_path' => $request_path,
-        'request_method' => isset($_SERVER['REQUEST_METHOD']) ? sanitize_text_field(wp_unslash($_SERVER['REQUEST_METHOD'])) : '',
-        'request_headers' => smalk_get_request_headers(),
-        'wordpress_plugin_version' => SMALK_AI_WORDPRESS_PLUGIN_VERSION,
-        'timestamp' => time(),
-        'unique_id' => uniqid('smalk_fallback_', true),
-        'fallback_tracking' => true
-    );
-
-    // Output CORS-friendly JavaScript for server-side tracking fallback with deduplication
-    ?>
-    <script type="text/javascript">
-    (function() {
-        // Deduplication: only run fallback if main tracker hasn't loaded within 3 seconds
-        setTimeout(function() {
-            // Check if main tracker is working
-            if (!window.smalkTrackerLoaded && !window.smalkAnalyticsActive) {
-                try {
-                    var xhr = new XMLHttpRequest();
-                    xhr.open('POST', '<?php echo esc_js(class_exists('Smalk_API') ? Smalk_API::get_tracking_url() : 'https://api.smalk.ai/api/v1/tracking/visit/'); ?>', true);
-                    xhr.setRequestHeader('Content-Type', 'application/json');
-                    xhr.setRequestHeader('Authorization', 'Api-Key <?php echo esc_js($access_token); ?>');
-                    
-                    xhr.onload = function() {
-                        if (xhr.status >= 200 && xhr.status < 300) {
-                            window.smalkFallbackSent = true;
-                        }
-                    };
-                    
-                    xhr.onerror = function() {
-                        // Silent fail
-                    };
-                    
-                    xhr.send(JSON.stringify(<?php echo wp_json_encode($tracking_data); ?>));
-                } catch(e) {
-                    // Silent fail
-                }
-            }
-        }, 3000); // Wait 3 seconds before fallback
-    })();
-    </script>
-    <?php
-}
-add_action('wp_footer', 'smalk_server_side_tracking_fallback', 999);
-
-// SOLUTION 1: Client Analytics - Enhanced Dynamic Script Loading
 function smalk_add_analytics_script_tag() {
     if (!smalk_is_analytics_enabled_and_allowed()) {
         return;
@@ -162,18 +100,7 @@ function smalk_add_analytics_script_tag() {
         
         // Enhanced error and load handling
         script.onload = function() {
-            // Set flag to prevent fallback tracking
             window.smalkTrackerLoaded = true;
-            window.smalkAnalyticsActive = true;
-            
-            // Initialize tracker if needed
-            if (typeof window.smalkInit === 'function') {
-                try {
-                    window.smalkInit();
-                } catch(e) {
-                    // Silent fail
-                }
-            }
         };
         
         script.onerror = function() {

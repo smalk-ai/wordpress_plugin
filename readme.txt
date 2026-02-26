@@ -5,7 +5,7 @@ Tags: Generative Engine Optimization,AI Crawlers,Answer Engine Optimization
 Requires at least: 5.0
 Tested up to: 6.8
 Requires PHP: 7.0
-Stable tag: 1.0.12
+Stable tag: 1.0.13
 License: GPLv3
 License URI: http://www.gnu.org/licenses/gpl.html
 
@@ -72,6 +72,9 @@ For more information about our data handling practices, please visit:
   - The performance and relevance of your website in the age of AI
 
 == CHANGELOG ==
+**1.0.13**
+- Added X-Smalk-CMS and X-Smalk-Plugin-Version headers on tracking requests for CMS detection
+
 **1.0.12**
 - Fix: use cached project ID instead of calling the API on every page load
 - Fix: add trailing slashes to all API endpoint URLs to avoid 301 redirects
