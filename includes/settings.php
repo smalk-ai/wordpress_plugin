@@ -10,35 +10,35 @@ function smalk_sanitize_checkbox($input) {
 
 function smalk_register_settings() {
     // Then define settings arguments
-    define('SMALK_AI_ACCESS_TOKEN_ARGS', array(
+    $access_token_args = array(
         'type' => 'string',
         'group' => SMALK_AI_SETTINGS_GROUP,
         'description' => 'Smalk AI Access Token',
         'sanitize_callback' => 'sanitize_text_field',
         'show_in_rest' => false,
         'default' => ''
-    ));
+    );
 
-    define('SMALK_AI_ANALYTICS_ENABLED_ARGS', array(
+    $analytics_enabled_args = array(
         'type' => 'boolean',
         'group' => SMALK_AI_SETTINGS_GROUP,
         'description' => 'Enable/Disable Analytics',
         'sanitize_callback' => 'smalk_sanitize_checkbox',  // Now the function exists
         'show_in_rest' => false,
         'default' => '1'
-    ));
+    );
 
     // Register settings...
     register_setting(
         SMALK_AI_SETTINGS_GROUP,
         SMALK_AI_ACCESS_TOKEN,
-        SMALK_AI_ACCESS_TOKEN_ARGS
+        $access_token_args
     );
 
     register_setting(
         SMALK_AI_SETTINGS_GROUP,
         SMALK_AI_IS_ANALYTICS_ENABLED,
-        SMALK_AI_ANALYTICS_ENABLED_ARGS
+        $analytics_enabled_args
     );
 
     // Workspace info settings

@@ -3,9 +3,9 @@ Contributors: smalker001
 Website: https://www.smalk.ai
 Tags: Generative Engine Optimization,AI Crawlers,Answer Engine Optimization
 Requires at least: 5.0
-Tested up to: 6.8
+Tested up to: 6.9
 Requires PHP: 7.0
-Stable tag: 1.0.13
+Stable tag: 1.0.14
 License: GPLv3
 License URI: http://www.gnu.org/licenses/gpl.html
 
@@ -72,6 +72,10 @@ For more information about our data handling practices, please visit:
   - The performance and relevance of your website in the age of AI
 
 == CHANGELOG ==
+**1.0.14**
+- Fix: replaced define() inside function with local variables to prevent fatal error on re-registration
+- Tested up to WordPress 6.9
+
 **1.0.13**
 - Added X-Smalk-CMS and X-Smalk-Plugin-Version headers on tracking requests for CMS detection
 
