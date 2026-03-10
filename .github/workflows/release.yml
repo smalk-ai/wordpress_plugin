@@ -1,0 +1,53 @@
+name: Release Plugin
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Extract plugin version
+        id: version
+        run: |
+          VERSION=$(grep -m1 'Version:' smalk-ai-analytics.php | sed 's/.*Version: *//')
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          echo "Plugin version: $VERSION"
+
+      - name: Check if release already exists
+        id: check
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PLUGIN_VERSION: ${{ steps.version.outputs.version }}
+        run: |
+          if gh release view "v${PLUGIN_VERSION}" &>/dev/null; then
+            echo "exists=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "exists=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Build zip
+        if: steps.check.outputs.exists == 'false'
+        run: |
+          PLUGIN_SLUG="smalk-ai-analytics"
+          mkdir -p "build/${PLUGIN_SLUG}"
+          rsync -a --exclude='.git' --exclude='.github' --exclude='.DS_Store' --exclude='build' . "build/${PLUGIN_SLUG}/"
+          cd build
+          zip -r "${PLUGIN_SLUG}.zip" "${PLUGIN_SLUG}"
+
+      - name: Create release
+        if: steps.check.outputs.exists == 'false'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PLUGIN_VERSION: ${{ steps.version.outputs.version }}
+        run: |
+          gh release create "v${PLUGIN_VERSION}" \
+            build/smalk-ai-analytics.zip \
+            --title "v${PLUGIN_VERSION}" \
+            --generate-notes
